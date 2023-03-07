@@ -10,7 +10,7 @@ dotenv.config()
 const token = process.env.TELEGRAM_BOT_TOKEN
 const bot = new TelegramBot(token, { polling: true })
 let lastMessageTime = 0
-async function createPrediction (text) {
+async function createPrediction(text) {
   const response = await axios.post(
     'https://api.replicate.com/v1/predictions',
     {
@@ -18,9 +18,11 @@ async function createPrediction (text) {
       // See https://replicate.com/stability-ai/stable-diffussion/versions
       version:
         '436b051ebd8f68d23e83d22de5e198e0995357afef113768c20f0b6fcef23c8b', //stable-diffussion
-      input: { prompt: "mdjrny-v4 style " + text,
-      width: 1024,
-      height: 576 }
+      input: {
+        prompt: "mdjrny-v4 style " + text,
+        width: 1024,
+        height: 576
+      }
     },
     {
       headers: {
@@ -34,7 +36,7 @@ async function createPrediction (text) {
   return prediction
 }
 
-async function getPredictionStatus (id) {
+async function getPredictionStatus(id) {
   const response = await axios.get(
     'https://api.replicate.com/v1/predictions/' + id,
     {
@@ -59,10 +61,10 @@ const pending = async (sentMessage, chatId, username) => {
     await sleep(1000)
     bot.editMessageText(
       '@' +
-        username +
-        " You're in cooldown mode please wait " +
-        index +
-        ' seconds.',
+      username +
+      " You're in cooldown mode please wait " +
+      index +
+      ' seconds.',
       {
         chat_id: chatId,
         message_id: sentMessage.message_id
@@ -71,7 +73,7 @@ const pending = async (sentMessage, chatId, username) => {
   }
 }
 
-bot.onText(/\/imagine (.+)/, async (msg, match) => {
+bot.onText(/\/prince (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
   const username = msg.from.username
   const now = Date.now()
@@ -86,20 +88,20 @@ bot.onText(/\/imagine (.+)/, async (msg, match) => {
         .sendMessage(
           chatId,
           '@' +
-            username +
-            " You're in cooldown mode please wait 14 seconds."
+          username +
+          " You're in cooldown mode please wait 14 seconds."
         )
         .then(sentMessage => {
           pending(sentMessage, chatId, username)
         })
       return
     }
-  }0
-1
+  }
+
   // Update the last message time for this user
   userMessageTime.set(chatId, now)
   bot.sendMessage(
-    chatId, "customizeaprint and cryptosnowprince\n" + "Cats and dogs with rainbow\n" + " Generating images for @" + username
+    chatId, "Generating images for @" + username
   )
   //"I hope to discuss in telegram with you. My telegram id is GloryDream413."
   // const image = await generateImage(match[1]);
@@ -109,8 +111,7 @@ bot.onText(/\/imagine (.+)/, async (msg, match) => {
   while (prediction.status !== 'succeeded' && prediction.status !== 'failed') {
     await sleep(1000);
     nCount++;
-    if(nCount >= 60)
-    {
+    if (nCount >= 60) {
       break;
     }
     response = await getPredictionStatus(prediction.id)
@@ -120,16 +121,17 @@ bot.onText(/\/imagine (.+)/, async (msg, match) => {
   }
   if (response.output) {
     bot.sendPhoto(chatId, response.output[response.output.length - 1], {
-      caption: 'customizeaprint and cryptosnowprince\n' + 'Cats and dogs with rainbow\n' + 'Generated for @' + username + ': ' + match[1],
+      caption: 'Generated for @' + username + ': ' + match[1],
       reply_to_message_id: msg.message_id
     })
     console.log('Generated for @' + username)
-  } else {-
-    bot.sendMessage(chatId, 'Sorry. could you again please.');
+  } else {
+    -
+      bot.sendMessage(chatId, 'Sorry. could you again please.');
   }
 })
 
-if(bot.isPolling()) {
+if (bot.isPolling()) {
   await bot.stopPolling();
 }
 await bot.startPolling();
